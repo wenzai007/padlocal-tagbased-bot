@@ -85,28 +85,45 @@ async function main() {
           for(let m=0;m<tagNames.length;m++){
             log.info('Bot', 'Contact: "%s" with tag name for each of them is: "%s"',
                       contact.name(),
-                      tagNames[m],
+                      tagNames[m]['id'],
               )
 
+              /*
               var pp = tagNames[m];
               for(var property in pp) {
                 log.info(property);
                 log.info(pp['id'])
               }
+              */
           }
       }
+
+      //const tag = await bot.Tag.get('newtesttag');
+      const tag = await bot.Tag.get('pretty');
+
+      log.info('Bot', 'current loaded tag is "%s"', 
+                tag['id']);
+
+      await tag.add(contact);
+      log.info('Bot', 'Contact: "%s" already added into the tag of : "%s"',
+                      contact.name(),
+                      tag['id'],
+              )
 
       /**
        * Save avatar to file like: "1-name.jpg"
        */
+      /*
       const file = await contact.avatar()
       const name = file.name
       await file.toFile(name, true)
-  
+
       log.info('Bot', 'Contact: "%s" with avatar file: "%s"',
                       contact.name(),
                       name,
               )
+
+      */
   
       if (i > MAX) {
         log.info('Bot', 'Contacts too many, I only show you the first %d ... ', MAX)
