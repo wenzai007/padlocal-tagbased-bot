@@ -98,17 +98,29 @@ async function main() {
           }
       }
 
-      //const tag = await bot.Tag.get('newtesttag');
-      const tag = await bot.Tag.get('pretty');
+      const tag = await bot.Tag.get('newtesttag');
+      //const tag = await bot.Tag.get('pretty');
 
       log.info('Bot', 'current loaded tag is "%s"', 
                 tag['id']);
 
-      await tag.add(contact);
-      log.info('Bot', 'Contact: "%s" already added into the tag of : "%s"',
-                      contact.name(),
-                      tag['id'],
-              )
+      const isFriend = contact.friend();
+
+      if(isFriend != true ){
+        log.info('Bot', 'Contact: "%s" is not the friend of the bot, so will not add into the tag : "%s"',
+        contact.name(),
+        tag['id'],
+        );
+      }
+      else{
+        await tag.add(contact);
+        
+        log.info('Bot', 'Contact: "%s" is bot friend and already added into the tag of : "%s"',
+        contact.name(),
+        tag['id'],
+        );
+      }
+     
 
       /**
        * Save avatar to file like: "1-name.jpg"
