@@ -45,8 +45,12 @@ console.log("TestBot", "started");
  * Main Contact Bot
  */
 async function main() {
-    const contactList = await bot.Contact.findAll()
+    //const contactList = await bot.Contact.findAll()
+    const contactList = await bot.Contact.findAll({ name: 'Medusa' })
   
+
+    
+
     log.info('Bot', '#######################')
     log.info('Bot', 'Contact number: %d\n', contactList.length)
   
@@ -106,6 +110,11 @@ async function main() {
 
       const isFriend = contact.friend();
 
+      log.info('Bot', 'Contact: "%s" is our friend?  result is : "%s"',
+      contact.name(),
+      isFriend,
+      );
+
       if(isFriend != true ){
         log.info('Bot', 'Contact: "%s" is not the friend of the bot, so will not add into the tag : "%s"',
         contact.name(),
@@ -113,6 +122,11 @@ async function main() {
         );
       }
       else{
+        log.info('Bot', 'Contact: "%s" is bot friend and will try to add into the tag of : "%s"',
+        contact.name(),
+        tag['id'],
+        );
+
         await tag.add(contact);
         
         log.info('Bot', 'Contact: "%s" is bot friend and already added into the tag of : "%s"',
