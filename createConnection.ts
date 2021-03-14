@@ -3,13 +3,23 @@ import {createConnection} from "typeorm";
 import {TagCatalog} from "./entity/TagCatalog";
 import * as fs from 'fs';
 
+interface MyObj {
+    host: string;
+    username: string;
+    password: string;
+    database: string;
+}
+
+let contentOfJson: string = fs.readFileSync(__dirname + '/mysqlPara.json', 'utf-8');
+let obj: MyObj = JSON.parse(contentOfJson);
+
 createConnection({
     type: "mysql",
-    host: "mysqlserver4frdfunctionapp.mysql.database.azure.com",
+    host: obj.host,
     port: 3306,
-    username: "frdmysqladmin@mysqlserver4frdfunctionapp",
-    password: "Pwd123456",
-    database: "wechaty_db",
+    username: obj.username,
+    password: obj.password,
+    database: obj.database,
     ssl: {
         ca: fs.readFileSync( __dirname + '/BaltimoreCyberTrustRoot.crt.pem' )
     },
@@ -21,7 +31,7 @@ createConnection({
   }).then(async connection => {
    
     let catalog = new TagCatalog();
-    catalog.tag = "newtesttag2";
+    catalog.tag = "newtesttagForHidden";
     catalog.autoReplyMsg = "Hi, welcome to the store!";
     catalog.scheduleMsg = "How are you recently, we are now having new product in link ===";
    
