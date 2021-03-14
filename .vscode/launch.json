@@ -5,6 +5,20 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "type": "node",
+            "name": "Launch Program",
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ], 
+            "program": "${workspaceFolder}/testdebug.ts",
+            "preLaunchTask": "tsc: build - tsconfig.json",
+            "outFiles": [
+                "${workspaceFolder}/out/**/*.js"
+            ],
+            //"runtimeExecutable": "/usr/local/bin/node"
+        },
+        {
             "name": "Launch Chrome",
             "request": "launch",
             "type": "pwa-chrome",
@@ -25,10 +39,10 @@
             //    "${workspaceFolder}/**/*.js"
             //],
             //"protocol": "inspector",
-            "resolveSourceMapLocations": [
-                "/Users/Knight/Working/github/padlocal-tagbased-bot/**",
-                "!**/node_modules/**"
-            ],
+            //"resolveSourceMapLocations": [
+               // "/Users/Knight/Working/github/padlocal-tagbased-bot/**",
+               // "!**/node_modules/**"
+            //],
             "runtimeArgs": ["-r", "ts-node/register", "-r", "tsconfig-paths/register"],
             "runtimeExecutable": "/usr/local/bin/node"
         }

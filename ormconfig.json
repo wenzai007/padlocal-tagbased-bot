@@ -1,0 +1,19 @@
+{
+    "type": "mysql",
+    "host": "mysqlserver4frdfunctionapp.mysql.database.azure.com",
+    "port": 3306,
+    "username": "frdmysqladmin@mysqlserver4frdfunctionapp",
+    "password": "Pwd123456",
+    "database": "wechaty_db",
+    "synchronize": true,
+    "logging": false,
+    "entities": [
+       "src/entity/**/*.ts"
+    ],
+    "migrations": [
+       "src/migration/**/*.ts"
+    ],
+    "subscribers": [
+     "src/subscriber/**/*.ts"
+    ]
+ }
