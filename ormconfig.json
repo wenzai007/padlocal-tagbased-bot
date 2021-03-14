@@ -7,8 +7,11 @@
     "database": "wechaty_db",
     "synchronize": true,
     "logging": false,
+    "ssl": {
+        "ca": "BaltimoreCyberTrustRoot.crt.pem"
+      },
     "entities": [
-       "src/entity/**/*.ts"
+       "entity/**/*.ts"
     ],
     "migrations": [
        "src/migration/**/*.ts"

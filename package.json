@@ -10,6 +10,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@types/node": "^14.14.34",
+    "mysql": "^2.18.1",
     "typeorm": "^0.2.31",
     "wechaty": "^0.56.6",
     "wechaty-puppet-padlocal": "^0.2.31"
