@@ -203,7 +203,7 @@ async function main() {
   }
 
 
-  function getAllTagRecords() : Promise<TagCatalog[]>{
+  async function getAllTagRecords() : Promise<TagCatalog[]>{
     
      return createConnection({
         type: "mysql",
@@ -276,6 +276,7 @@ async function main() {
             );
 
             // will really send the message to the sender!
+            fromPerson.say(autoReplyMsg);
           }
           else{
             log.info(
