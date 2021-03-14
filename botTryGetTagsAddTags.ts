@@ -1,16 +1,38 @@
 // botTryGetTagsAddTags.ts
 
+import "reflect-metadata";
+import {createConnection} from "typeorm";
+import {TagCatalog} from "./entity/TagCatalog";
+import * as fs from 'fs';
+
 import {PuppetPadlocal} from "wechaty-puppet-padlocal";
-import {Contact, Message, ScanStatus, Wechaty, log} from "wechaty";
+import {Contact, Message, ScanStatus, Wechaty, log, Tag} from "wechaty";
+
+interface MyObj {
+  host: string;
+  username: string;
+  password: string;
+  database: string;
+}
+
+let contentOfJson: string = fs.readFileSync(__dirname + '/mysqlPara.json', 'utf-8');
+let obj: MyObj = JSON.parse(contentOfJson);
+
 
 const token: string = "puppet_padlocal_85f584183cb345459e3de985e01b0fe5"            // padlocal token
 const puppet = new PuppetPadlocal({ token })
 
+// don't know why, if we define here, the function will not get the records while
+// inside other functions, looks like this cannot be a static variable.. 
+const globaltagCatalogs =  getAllTagRecords();
+console.log("firstly tags from db is ", globaltagCatalogs);
 
 const bot = new Wechaty({
     name: "TestBot",
     puppet,
 })
+
+
 
 bot
 .on("scan", (qrcode: string, status: ScanStatus) => {
@@ -34,7 +56,10 @@ bot
 })
 
 .on("message", async (message: Message) => {
-    console.log(`on message: ${message.toString()}`);
+    console.log(`on message: the message is from ${message.from()}`);
+    console.log(`on message: the message content: ${message.text()}`);
+
+    dealwithAutoReply(message);
 })
 
 .start()
@@ -169,7 +194,96 @@ async function main() {
       }
     }
   
+    // don't re-dump weixin now just comment out this part...
+    /*
     const SLEEP = 7
     log.info('Bot', 'I will re-dump contact weixin id & names after %d second... ', SLEEP)
     setTimeout(main, SLEEP * 1000)
+    */
   }
+
+
+  function getAllTagRecords() : Promise<TagCatalog[]>{
+    
+     return createConnection({
+        type: "mysql",
+        host: obj.host,
+        port: 3306,
+        username: obj.username,
+        password: obj.password,
+        database: obj.database,
+        ssl: {
+            ca: fs.readFileSync( __dirname + '/BaltimoreCyberTrustRoot.crt.pem' )
+        },
+        entities: [
+            __dirname + "/entity/*.ts"
+        ],
+        synchronize: true,
+        logging: false
+      }).then(async connection => {
+      
+        let allTagsCatalogs = await connection.manager.find(TagCatalog);
+        console.log("All catalogs from the db: ", allTagsCatalogs);
+        return allTagsCatalogs;
+      }).catch(error => {
+        console.log(error);
+        return [];
+      });
+  }
+
+  async function dealwithAutoReply(message: Message){
+    /*
+    if(tagCatalogs ===null){
+      return;
+    }
+    */
+
+
+    let fromPerson =  await message.talker();
+      console.log("the person who sent the message is ", fromPerson);
+      if(fromPerson === null){
+        return;
+      }
+
+      const isFriend = await fromPerson.friend();
+
+      if(!isFriend){
+        console.log("the person is not my friend ", fromPerson);
+        return;
+      }
+
+      console.log("the person is my good friend ", fromPerson);
+
+      const tagsOfCurPerson = await fromPerson.tags();
+      console.log("all the tags of the current persion is ", tagsOfCurPerson);
+
+      //let tagCatalogs = getAllTagRecords();
+      console.log("all the tags in our db is ", globaltagCatalogs);
+
+      (await globaltagCatalogs).forEach(tagRecord => {
+        let autoReplyMsg: string = tagRecord.autoReplyMsg;
+          
+        for(let j=0; j< tagsOfCurPerson.length; j++){
+          let curTagNameOfSender: string = tagsOfCurPerson[j]['id'];
+          console.log("the current tag for current person is ", curTagNameOfSender);
+
+          console.log("the current tag in our db is ", tagRecord.tag)
+          if(tagRecord.tag === curTagNameOfSender){
+            log.info(
+              "will send message of %s for the person of %s", 
+              autoReplyMsg,
+              fromPerson
+            );
+
+            // will really send the message to the sender!
+          }
+          else{
+            log.info(
+              "the two tags of %s and %s are different, will do nothing",
+              tagRecord.tag,
+              curTagNameOfSender);
+          }
+        }
+
+      });
+}
