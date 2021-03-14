@@ -6,6 +6,14 @@
     "configurations": [
         {
             "type": "node",
+            "name": "LaunchAgain",
+            "request": "launch",
+            "cwd": "${workspaceRoot}",
+            "runtimeArgs": ["-r", "/usr/local/lib/node_modules/ts-node/register"],//核心
+            "args": ["${workspaceFolder}/testdebug.ts"]​
+        },
+        {
+            "type": "node",
             "name": "Launch Program",
             "request": "launch",
             "skipFiles": [
