@@ -17,13 +17,15 @@ bot
     if (status === ScanStatus.Waiting && qrcode) {
         const qrcodeImageUrl = ["https://api.qrserver.com/v1/create-qr-code/?data=", encodeURIComponent(qrcode)].join("");
         console.log(`onScan: ${ScanStatus[status]}(${status}) - ${qrcodeImageUrl}`);
-    } else {
+    } else { 
         console.log(`onScan: ${ScanStatus[status]}(${status})`);
     }
 })
 
 .on("login", (user: Contact) => {
     console.log(`${user} login`);
+
+    // here we run the main method
     main()
 })
 
@@ -45,8 +47,12 @@ console.log("TestBot", "started");
  * Main Contact Bot
  */
 async function main() {
-    const contactList = await bot.Contact.findAll()
+    //const contactList = await bot.Contact.findAll()
+    const contactList = await bot.Contact.findAll({ name: 'Medusa' })
   
+
+    
+
     log.info('Bot', '#######################')
     log.info('Bot', 'Contact number: %d\n', contactList.length)
   
@@ -98,17 +104,49 @@ async function main() {
           }
       }
 
-      //const tag = await bot.Tag.get('newtesttag');
-      const tag = await bot.Tag.get('pretty');
+      const tag = await bot.Tag.get('newtesttag');
+      //const tag = await bot.Tag.get('pretty');
 
       log.info('Bot', 'current loaded tag is "%s"', 
                 tag['id']);
 
-      await tag.add(contact);
-      log.info('Bot', 'Contact: "%s" already added into the tag of : "%s"',
-                      contact.name(),
-                      tag['id'],
-              )
+      const isFriend = contact.friend();
+
+      log.info('Bot', 'Contact: "%s" is our friend?  result is : "%s"',
+      contact.name(),
+      isFriend,
+      );
+
+      if(isFriend != true ){
+        log.info('Bot', 'Contact: "%s" is not the friend of the bot, so will not add into the tag : "%s"',
+        contact.name(),
+        tag['id'],
+        );
+      }
+      else{
+        log.info('Bot', 'Contact: "%s" is bot friend and will try to add into the tag of : "%s"',
+        contact.name(),
+        tag['id'],
+        );
+
+        const tagsOfCurrentContact = await contact.tags()
+        if(tagsOfCurrentContact.indexOf(tag)>=0){
+            log.info('Bot', 'Contact: "%s" is bot friend and previously already added into the tag of : "%s"'
+            +', so this time we just skip adding it' ,
+            contact.name(),
+            tag['id'],
+            );
+        }
+        else{
+          await tag.add(contact);
+
+          log.info('Bot', 'Contact: "%s" is bot friend and already added into the tag of : "%s"',
+          contact.name(),
+          tag['id'],
+          );
+        }
+      }
+     
 
       /**
        * Save avatar to file like: "1-name.jpg"
@@ -134,5 +172,4 @@ async function main() {
     const SLEEP = 7
     log.info('Bot', 'I will re-dump contact weixin id & names after %d second... ', SLEEP)
     setTimeout(main, SLEEP * 1000)
-  
   }

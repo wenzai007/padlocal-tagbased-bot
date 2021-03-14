@@ -1,3 +1,5 @@
 *.jpg
 node_modules/
-
+*.pem
+ormconfig.json
+mysqlPara.json
