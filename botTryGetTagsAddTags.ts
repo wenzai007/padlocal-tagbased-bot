@@ -1,12 +1,16 @@
 // botTryGetTagsAddTags.ts
 
 import "reflect-metadata";
-import {createConnection} from "typeorm";
+import {createConnection, Connection} from "typeorm";
 import {TagCatalog} from "./entity/TagCatalog";
+import {ContactAndInterest} from "./entity/ContactAndInterest";
+
 import * as fs from 'fs';
 
 import {PuppetPadlocal} from "wechaty-puppet-padlocal";
 import {Contact, Message, ScanStatus, Wechaty, log, Tag} from "wechaty";
+import { BtcPriceMessage } from "./entity/BtcPriceMessage";
+import { UniCorn } from "./entity/UniCorn";
 
 interface MyObj {
   host: string;
@@ -66,17 +70,12 @@ bot
 
 console.log("TestBot", "started");
 
-
-
 /**
  * Main Contact Bot
  */
 async function main() {
     //const contactList = await bot.Contact.findAll()
     const contactList = await bot.Contact.findAll({ name: 'Medusa' })
-  
-
-    
 
     log.info('Bot', '#######################')
     log.info('Bot', 'Contact number: %d\n', contactList.length)
@@ -142,6 +141,7 @@ async function main() {
       isFriend,
       );
 
+     
       if(isFriend != true ){
         log.info('Bot', 'Contact: "%s" is not the friend of the bot, so will not add into the tag : "%s"',
         contact.name(),
@@ -205,25 +205,13 @@ async function main() {
 
   async function getAllTagRecords() : Promise<TagCatalog[]>{
     
-     return createConnection({
-        type: "mysql",
-        host: obj.host,
-        port: 3306,
-        username: obj.username,
-        password: obj.password,
-        database: obj.database,
-        ssl: {
-            ca: fs.readFileSync( __dirname + '/BaltimoreCyberTrustRoot.crt.pem' )
-        },
-        entities: [
-            __dirname + "/entity/*.ts"
-        ],
-        synchronize: true,
-        logging: false
-      }).then(async connection => {
+     return createMySQLConnection().then(async connection => {
       
         let allTagsCatalogs = await connection.manager.find(TagCatalog);
         console.log("All catalogs from the db: ", allTagsCatalogs);
+
+        // close the connection.
+        connection.close();
         return allTagsCatalogs;
       }).catch(error => {
         console.log(error);
@@ -244,6 +232,24 @@ async function main() {
       if(fromPerson === null){
         return;
       }
+
+       // display more info of this contact!
+      let aliasRes:string = await fromPerson.alias() as string;
+      if(aliasRes !=null){
+      log.info("after judge current contact alias is: %s  ", aliasRes);
+      console.log("after judge current contact alias is: ", aliasRes);
+      }
+
+      log.info("current contact alias: %s  ", await fromPerson.alias());
+      log.info("current contact id property is: %s  ", fromPerson['id']);
+      log.info("current contact payload property is: %s  ", fromPerson['payload']);
+
+
+      const payload = fromPerson['payload'];
+      log.info("current contact alias inside payload is: %s  ", payload?.alias);
+      log.info("current contact name inside payload is: %s  ", payload?.name);
+
+
 
       const isFriend = await fromPerson.friend();
 
@@ -269,14 +275,9 @@ async function main() {
 
           console.log("the current tag in our db is ", tagRecord.tag)
           if(tagRecord.tag === curTagNameOfSender){
-            log.info(
-              "will send message of %s for the person of %s", 
-              autoReplyMsg,
-              fromPerson
-            );
-
-            // will really send the message to the sender!
-            fromPerson.say(autoReplyMsg);
+            // deal with matched person
+            replyMessageAndProcessMatchedPerson(fromPerson, autoReplyMsg, message, curTagNameOfSender);
+            
           }
           else{
             log.info(
@@ -285,6 +286,161 @@ async function main() {
               curTagNameOfSender);
           }
         }
-
       });
+}
+
+async function replyMessageAndProcessMatchedPerson(fromPerson: Contact, autoReplyMsg: string, message: Message, tagName: string){
+  if(tagName === "btc"){
+    replyBtcMessage(fromPerson, autoReplyMsg, message, tagName);
+    updateDbForInterest(fromPerson, tagName);
+  }
+  else if(tagName === "company"){
+    replyCompanayMessage(fromPerson, autoReplyMsg, message, tagName);
+    updateDbForInterest(fromPerson, tagName);
+  }
+
+  else{
+    log.info(
+      "will send message of %s for the person of %s", 
+      autoReplyMsg,
+      fromPerson
+    );
+
+    // will really send the message to the sender!
+    fromPerson.say(autoReplyMsg);
+
+    
+  }
+}
+
+async function replyBtcMessage(fromPerson: Contact, autoReplyMsg: string, message: Message, tagName: string){
+  let text = message.text();
+    
+  // if they are not going to get the detail message.
+    if(text != "1" ){
+      fromPerson.say(autoReplyMsg);
+      return;
+    }
+
+    else{
+      sayCurrentPrice(fromPerson);
+    }
+}
+
+async function replyCompanayMessage(fromPerson: Contact, autoReplyMsg: string, message: Message, tagName: string){
+  let text = message.text();
+
+  if(text != "1" ){
+    fromPerson.say(autoReplyMsg);
+    return;
+  }
+
+  else{
+    sayCurrentUnicorns(fromPerson);
+  }
+}
+
+
+async function updateDbForInterest(fromPerson: Contact, tagName: string){
+  createMySQLConnection().then(async connection => {
+  
+    let personRepository = connection.getRepository(ContactAndInterest);
+
+    let personIntrestToUpdate = await personRepository.findOne({wxid: fromPerson.id});
+
+    console.log("the person to update from the db: ", personIntrestToUpdate);
+
+    if(personIntrestToUpdate){
+
+      personIntrestToUpdate.wxid  = fromPerson.id;
+
+      // if before is true then assign, else use empty
+      personIntrestToUpdate.alias = await fromPerson.alias() || '';
+      personIntrestToUpdate.name = await fromPerson.name() || '';
+      personIntrestToUpdate.tag  = tagName;
+      personIntrestToUpdate.talktimes = personIntrestToUpdate.talktimes + 1;
+    }else{
+      personIntrestToUpdate = new ContactAndInterest();
+
+      personIntrestToUpdate.wxid  = fromPerson.id;
+      personIntrestToUpdate.alias = await fromPerson.alias() || '';
+      personIntrestToUpdate.name = await fromPerson.name() || '';
+      personIntrestToUpdate.tag  = tagName;
+      personIntrestToUpdate.talktimes =  1;
+    }
+
+    console.log("personIntrestToUpdate wxid is ", personIntrestToUpdate.wxid );
+    console.log("personIntrestToUpdate alias is ", personIntrestToUpdate.alias );
+    console.log("personIntrestToUpdate name is ", personIntrestToUpdate.name );
+    console.log("personIntrestToUpdate tag is ", personIntrestToUpdate.tag );
+    console.log("personIntrestToUpdate talktimes is ", personIntrestToUpdate.talktimes );
+
+
+    await personRepository.save(personIntrestToUpdate);
+    log.info("updated the personInterest object of %s", personIntrestToUpdate);
+
+    // close the connection.
+    connection.close();
+  }).catch(error => {
+    console.log(error);
+  });
+}
+
+async function sayCurrentPrice(fromPersion: Contact){
+  createMySQLConnection().then(async connection => {
+  
+    let btcMessageRepository = connection.getRepository(BtcPriceMessage);
+
+    let btcCurrentPrice = await btcMessageRepository.findOne({id: 1});
+
+    console.log("the current price meesage: ", btcCurrentPrice);
+
+    if(btcCurrentPrice){
+      fromPersion.say(btcCurrentPrice.message);
+    }else{
+      fromPersion.say("Sorry, did not find the current btc price in our system");
+    }
+
+    // close the connection.
+    connection.close();
+  })
+}
+
+async function sayCurrentUnicorns(fromPersion: Contact){
+  createMySQLConnection().then(async connection => {
+  
+    let unicornRepository = connection.getRepository(UniCorn);
+
+    let highestUnicorns = await unicornRepository.findOne({id: 1});
+
+    console.log("the current unicorn meesage: ", highestUnicorns);
+
+    if(highestUnicorns){
+      fromPersion.say(highestUnicorns.message);
+    }else{
+      fromPersion.say("Sorry, did not find the current unicorn information in our system");
+    }
+
+    // close the connection.
+    connection.close();
+  })
+}
+
+async function createMySQLConnection(): Promise<Connection>{
+  return createConnection({
+    type: "mysql",
+    host: obj.host,
+    port: 3306,
+    username: obj.username,
+    password: obj.password,
+    database: obj.database,
+    ssl: {
+        ca: fs.readFileSync( __dirname + '/BaltimoreCyberTrustRoot.crt.pem' )
+    },
+    entities: [
+        __dirname + "/entity/*.ts"
+    ],
+    synchronize: true,
+    logging: false
+  })
 }
