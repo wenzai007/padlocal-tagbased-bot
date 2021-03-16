@@ -3,3 +3,7 @@ node_modules/
 *.pem
 ormconfig.json
 mysqlPara.json
+createConnectionAndInsertTagNoupload.ts
+createConnectionInsertBtcMessageNoupload.ts
+createConnectionInsertContactNoupload.ts
+createConnectionInsertUnicornNoupload.ts
