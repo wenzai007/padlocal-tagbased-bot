@@ -351,7 +351,6 @@ async function updateDbForInterest(fromPerson: Contact, tagName: string){
     console.log("the person to update from the db: ", personIntrestToUpdate);
 
     if(personIntrestToUpdate){
-
       personIntrestToUpdate.wxid  = fromPerson.id;
 
       // if before is true then assign, else use empty
