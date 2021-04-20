@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "start": "react-scripts start",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -12,6 +13,7 @@
   "dependencies": {
     "@types/node": "^14.14.34",
     "mysql": "^2.18.1",
+    "react-scripts": "^4.0.3",
     "typeorm": "^0.2.31",
     "wechaty": "^0.56.6",
     "wechaty-puppet-padlocal": "^0.2.31"
