@@ -22,8 +22,8 @@ interface MyObj {
 let contentOfJson: string = fs.readFileSync(__dirname + '/mysqlPara.json', 'utf-8');
 let obj: MyObj = JSON.parse(contentOfJson);
 
-
-const token: string = "puppet_padlocal_85f584183cb345459e3de985e01b0fe5"            // padlocal token
+// padlocal token
+const token: string = "puppet_padlocal_85f584183cb345459e3de985e01b0fe5"
 const puppet = new PuppetPadlocal({ token })
 
 // don't know why, if we define here, the function will not get the records while
