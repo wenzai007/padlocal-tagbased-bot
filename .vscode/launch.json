@@ -53,6 +53,26 @@
             //],
             "runtimeArgs": ["-r", "ts-node/register", "-r", "tsconfig-paths/register"],
             "runtimeExecutable": "/usr/local/bin/node"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "20220626",
+            "program": "${workspaceFolder}/botTryGetTagsAddTags.ts",
+            "preLaunchTask": "tsc: build - tsconfig.json",
+            "outFiles": ["${workspaceFolder}/out/**/*.js"]
+            //"args": [
+              //  "${relativeFile}"
+            //],
+            //"cwd": "${workspaceRoot}",
+            //"outFiles": [
+            //    "${workspaceFolder}/**/*.js"
+            //],
+            //"protocol": "inspector",
+            //"resolveSourceMapLocations": [
+               // "/Users/Knight/Working/github/padlocal-tagbased-bot/**",
+               // "!**/node_modules/**"
+            //],
         }
     ]
 }
