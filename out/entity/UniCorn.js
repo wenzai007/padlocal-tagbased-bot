@@ -14,15 +14,15 @@ const typeorm_1 = require("typeorm");
 let UniCorn = class UniCorn {
 };
 __decorate([
-    typeorm_1.PrimaryGeneratedColumn(),
+    (0, typeorm_1.PrimaryGeneratedColumn)(),
     __metadata("design:type", Number)
 ], UniCorn.prototype, "id", void 0);
 __decorate([
-    typeorm_1.Column(),
+    (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], UniCorn.prototype, "message", void 0);
 UniCorn = __decorate([
-    typeorm_1.Entity()
+    (0, typeorm_1.Entity)()
 ], UniCorn);
 exports.UniCorn = UniCorn;
 //# sourceMappingURL=UniCorn.js.map

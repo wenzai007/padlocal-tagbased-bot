@@ -14,15 +14,15 @@ const typeorm_1 = require("typeorm");
 let BtcPriceMessage = class BtcPriceMessage {
 };
 __decorate([
-    typeorm_1.PrimaryGeneratedColumn(),
+    (0, typeorm_1.PrimaryGeneratedColumn)(),
     __metadata("design:type", Number)
 ], BtcPriceMessage.prototype, "id", void 0);
 __decorate([
-    typeorm_1.Column(),
+    (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], BtcPriceMessage.prototype, "message", void 0);
 BtcPriceMessage = __decorate([
-    typeorm_1.Entity()
+    (0, typeorm_1.Entity)()
 ], BtcPriceMessage);
 exports.BtcPriceMessage = BtcPriceMessage;
 //# sourceMappingURL=BtcPriceMessage.js.map

@@ -14,23 +14,23 @@ const typeorm_1 = require("typeorm");
 let TagCatalog = class TagCatalog {
 };
 __decorate([
-    typeorm_1.PrimaryGeneratedColumn(),
+    (0, typeorm_1.PrimaryGeneratedColumn)(),
     __metadata("design:type", Number)
 ], TagCatalog.prototype, "id", void 0);
 __decorate([
-    typeorm_1.Column(),
+    (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], TagCatalog.prototype, "tag", void 0);
 __decorate([
-    typeorm_1.Column("text"),
+    (0, typeorm_1.Column)("text"),
     __metadata("design:type", String)
 ], TagCatalog.prototype, "autoReplyMsg", void 0);
 __decorate([
-    typeorm_1.Column("text"),
+    (0, typeorm_1.Column)("text"),
     __metadata("design:type", String)
 ], TagCatalog.prototype, "scheduleMsg", void 0);
 TagCatalog = __decorate([
-    typeorm_1.Entity()
+    (0, typeorm_1.Entity)()
 ], TagCatalog);
 exports.TagCatalog = TagCatalog;
 //# sourceMappingURL=TagCatalog.js.map

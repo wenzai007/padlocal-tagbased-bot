@@ -19,7 +19,6 @@ interface MyObj {
   database: string;
 }
 
-
 // padlocal token
 const token: string = "puppet_padlocal_85f584183cb345459e3de985e01b0fe5"
 const puppet = new PuppetPadlocal({ token })
@@ -70,7 +69,7 @@ console.log("TestBot", "started");
  */
 async function main() {
     //const contactList = await bot.Contact.findAll()
-    const contactList = await bot.Contact.findAll({ name: 'Medusa' })
+    const contactList = await bot.Contact.findAll({ name: 'Owen' })
 
     log.info('Bot', '#######################')
     log.info('Bot', 'Contact number: %d\n', contactList.length)

@@ -53,7 +53,7 @@ console.log("TestBot", "started");
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         //const contactList = await bot.Contact.findAll()
-        const contactList = yield bot.Contact.findAll({ name: 'Medusa' });
+        const contactList = yield bot.Contact.findAll({ name: 'Owen' });
         wechaty_1.log.info('Bot', '#######################');
         wechaty_1.log.info('Bot', 'Contact number: %d\n', contactList.length);
         /**

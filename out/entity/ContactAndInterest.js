@@ -14,31 +14,31 @@ const typeorm_1 = require("typeorm");
 let ContactAndInterest = class ContactAndInterest {
 };
 __decorate([
-    typeorm_1.PrimaryGeneratedColumn(),
+    (0, typeorm_1.PrimaryGeneratedColumn)(),
     __metadata("design:type", Number)
 ], ContactAndInterest.prototype, "id", void 0);
 __decorate([
-    typeorm_1.Column(),
+    (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], ContactAndInterest.prototype, "tag", void 0);
 __decorate([
-    typeorm_1.Column("int"),
+    (0, typeorm_1.Column)("int"),
     __metadata("design:type", Number)
 ], ContactAndInterest.prototype, "talktimes", void 0);
 __decorate([
-    typeorm_1.Column(),
+    (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], ContactAndInterest.prototype, "wxid", void 0);
 __decorate([
-    typeorm_1.Column(),
+    (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], ContactAndInterest.prototype, "alias", void 0);
 __decorate([
-    typeorm_1.Column({ type: "varchar", charset: "utf8", collation: "utf8_bin" }),
+    (0, typeorm_1.Column)({ type: "varchar", charset: "utf8", collation: "utf8_bin" }),
     __metadata("design:type", String)
 ], ContactAndInterest.prototype, "name", void 0);
 ContactAndInterest = __decorate([
-    typeorm_1.Entity()
+    (0, typeorm_1.Entity)()
 ], ContactAndInterest);
 exports.ContactAndInterest = ContactAndInterest;
 //# sourceMappingURL=ContactAndInterest.js.map
