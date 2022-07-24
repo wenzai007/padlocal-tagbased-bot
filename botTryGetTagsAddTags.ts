@@ -19,6 +19,10 @@ interface MyObj {
   database: string;
 }
 
+// open the debug logging.
+log.level("silly");
+
+
 // padlocal token
 const token: string = "puppet_padlocal_85f584183cb345459e3de985e01b0fe5"
 const puppet = new PuppetPadlocal({ token })
@@ -45,7 +49,7 @@ bot
 .on("login", (user: Contact) => {
     console.log(`${user} login`);
 
-    // here we run the main method
+    // here we run the main method, this is sync method to call async, so it will not block and wait.
     main()
 })
 
@@ -62,13 +66,18 @@ bot
 
 .start()
 
+
 console.log("TestBot", "started");
+
+
 
 /**
  * Main Contact Bot
  */
 async function main() {
     //const contactList = await bot.Contact.findAll()
+    log.info('Bot', 'starting the main function')
+
     const contactList = await bot.Contact.findAll({ name: 'Owen' })
 
     log.info('Bot', '#######################')

@@ -13,6 +13,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 require("reflect-metadata");
 const wechaty_puppet_padlocal_1 = require("wechaty-puppet-padlocal");
 const wechaty_1 = require("wechaty");
+// open the debug logging.
+wechaty_1.log.level("silly");
 // padlocal token
 const token = "puppet_padlocal_85f584183cb345459e3de985e01b0fe5";
 const puppet = new wechaty_puppet_padlocal_1.PuppetPadlocal({ token });
@@ -34,7 +36,7 @@ bot
 })
     .on("login", (user) => {
     console.log(`${user} login`);
-    // here we run the main method
+    // here we run the main method, this is sync method to call async, so it will not block and wait.
     main();
 })
     .on("logout", (user) => {
@@ -53,6 +55,7 @@ console.log("TestBot", "started");
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         //const contactList = await bot.Contact.findAll()
+        wechaty_1.log.info('Bot', 'starting the main function');
         const contactList = yield bot.Contact.findAll({ name: 'Owen' });
         wechaty_1.log.info('Bot', '#######################');
         wechaty_1.log.info('Bot', 'Contact number: %d\n', contactList.length);

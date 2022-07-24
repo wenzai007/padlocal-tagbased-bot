@@ -11,6 +11,6 @@ export class TagCatalog {
   @Column("text")
   autoReplyMsg: string;
  
-    @Column("text")
+  @Column("text")
   scheduleMsg: string;
 }

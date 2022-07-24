@@ -268,3 +268,4 @@ async function createMySQLConnection(): Promise<Connection>{
    logging: false
  })
 }
+

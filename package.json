@@ -5,7 +5,7 @@
   "scripts": {
     "build": "npm run compile-typescript",
     "compile-typescript": "tsc",
-    "service": "node ./out/botTryGetTagsAddTags.js",
+    "service": "node ./out/ImportContactsInfoDB.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
