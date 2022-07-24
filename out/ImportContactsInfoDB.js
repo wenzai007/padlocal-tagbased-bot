@@ -87,10 +87,9 @@ console.log("TestBot", "started");
  */
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
-        //const contactList = await bot.Contact.findAll()
         wechaty_1.log.info('Bot', 'starting the main function');
-        const contactList = yield bot.Contact.findAll();
-        //const contactList = await bot.Contact.findAll({ name: 'Owen' })
+        //const contactList = await bot.Contact.findAll()
+        const contactList = yield bot.Contact.findAll({ name: 'Owen' });
         wechaty_1.log.info('Bot', '#######################');
         wechaty_1.log.info('Bot', 'Contact number: %d\n', contactList.length);
         let wechatUsers = [];
@@ -117,14 +116,16 @@ function main() {
                 let tagNamesForCurUser = "";
                 wechaty_1.log.info('Bot', `personal ${i}: ${contact.name()} : ${contact.id}`);
                 const tagNames = yield contact.tags();
+                let tagArray = [];
                 for (var property in tagNames) {
                     wechaty_1.log.info(property + "=" + tagNames[property]);
                 }
                 if (tagNames != null && tagNames.length > 0) {
                     for (let m = 0; m < tagNames.length; m++) {
                         wechaty_1.log.info('Bot', 'Contact: "%s" with tag name for each of them is: "%s"', contact.name(), tagNames[m]['id']);
+                        tagArray.push(tagNames[m]['id']);
                     }
-                    tagNamesForCurUser = tagNames.join(';');
+                    tagNamesForCurUser = tagArray.join(';');
                 }
                 wechatUser.tag = tagNamesForCurUser;
                 const payload = contact['payload'];
