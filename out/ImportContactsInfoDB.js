@@ -38,58 +38,92 @@ const typeorm_1 = require("typeorm");
 const WechatFriendUserInfoInMartyAccount_1 = require("./entity/WechatFriendUserInfoInMartyAccount");
 const fs = __importStar(require("fs"));
 const wechaty_puppet_padlocal_1 = require("wechaty-puppet-padlocal");
+const helper_1 = require("./helper");
 const wechaty_1 = require("wechaty");
+const PUPPET = __importStar(require("wechaty-puppet"));
 // open the debug logging.
-// log.level("silly");
+wechaty_1.log.level("silly");
 let mainExecuteCount = 0;
-let contentOfJson = fs.readFileSync('d:/Working/MyOwnGithub/padlocal-tagbased-bot/ormconfig.json', 'utf-8');
+let contentOfJson = fs.readFileSync('E:/Working/MyOwnGithub/padlocal-tagbased-bot/ormconfig.json', 'utf-8');
 let obj = JSON.parse(contentOfJson);
 // padlocal token
-const token = "puppet_padlocal_85f584183cb345459e3de985e01b0fe5";
+// const token: string = "puppet_padlocal_85f584183cb345459e3de985e01b0fe5"
+const token = "puppet_padlocal_30a4a75df12f470e8af1642cd5e7e7e1";
 const puppet = new wechaty_puppet_padlocal_1.PuppetPadlocal({ token });
 // don't know why, if we define here, the function will not get the records while
 // inside other functions, looks like this cannot be a static variable.. 
-const bot = new wechaty_1.Wechaty({
-    name: "TestBot",
+const bot = wechaty_1.WechatyBuilder.build({
+    name: "PadLocalDemo",
     puppet,
 });
 bot
     .on("scan", (qrcode, status) => {
     if (status === wechaty_1.ScanStatus.Waiting && qrcode) {
-        const qrcodeImageUrl = ["https://api.qrserver.com/v1/create-qr-code/?data=", encodeURIComponent(qrcode)].join("");
-        console.log(`onScan: ${wechaty_1.ScanStatus[status]}(${status}) - ${qrcodeImageUrl}`);
+        const qrcodeImageUrl = [
+            'https://wechaty.js.org/qrcode/',
+            encodeURIComponent(qrcode),
+        ].join('');
+        wechaty_1.log.info(helper_1.LOGPRE, `onScan: ${wechaty_1.ScanStatus[status]}(${status}) - ${qrcodeImageUrl}`);
+        require('qrcode-terminal').generate(qrcode, { small: true }); // show qrcode on console
     }
     else {
-        console.log(`onScan: ${wechaty_1.ScanStatus[status]}(${status})`);
+        wechaty_1.log.info(helper_1.LOGPRE, `onScan: ${wechaty_1.ScanStatus[status]}(${status})`);
     }
 })
     .on("login", (user) => {
-    console.log(`${user} login`);
+    wechaty_1.log.info(helper_1.LOGPRE, `${user} login`);
     // here we run the main method, this is sync method to call async, so it will not block and wait.
-    mainExecuteCount = mainExecuteCount + 1;
-    if (mainExecuteCount >= 2) {
-        return;
-    }
     main();
 })
-    .on("logout", (user) => {
-    console.log(`${user} logout`);
+    .on("logout", (user, reason) => {
+    wechaty_1.log.info(helper_1.LOGPRE, `${user} logout, reason: ${reason}`);
 })
-    .on("message", (message) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(`on message: the message is from ${message.from()}`);
-    console.log(`on message: the message content: ${message.text()}`);
-    //dealwithAutoReply(message);
-}))
-    .start();
-console.log("TestBot", "started");
+    .on("error", (error) => {
+    wechaty_1.log.error(helper_1.LOGPRE, `on error: ${error}`);
+});
+/*
+.on("message", async (message) => {
+  log.info(LOGPRE, `on message: ${message.toString()}`);
+
+  await getMessagePayload(message);
+
+  await dingDongBot(message);
+})
+
+.on("room-invite", async (roomInvitation) => {
+  log.info(LOGPRE, `on room-invite: ${roomInvitation}`);
+})
+
+.on("room-join", (room, inviteeList, inviter, date) => {
+  log.info(LOGPRE, `on room-join, room:${room}, inviteeList:${inviteeList}, inviter:${inviter}, date:${date}`);
+})
+
+.on("room-leave", (room, leaverList, remover, date) => {
+  log.info(LOGPRE, `on room-leave, room:${room}, leaverList:${leaverList}, remover:${remover}, date:${date}`);
+})
+
+.on("room-topic", (room, newTopic, oldTopic, changer, date) => {
+  log.info(LOGPRE, `on room-topic, room:${room}, newTopic:${newTopic}, oldTopic:${oldTopic}, changer:${changer}, date:${date}`);
+})
+
+.on("friendship", (friendship) => {
+  log.info(LOGPRE, `on friendship: ${friendship}`);
+})
+
+*/
+// here to start.
+bot.start().then(() => {
+    wechaty_1.log.info(helper_1.LOGPRE, "started.");
+});
 /**
  * Main Contact Bot
  */
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         wechaty_1.log.info('Bot', 'starting the main function');
-        //const contactList = await bot.Contact.findAll()
-        const contactList = yield bot.Contact.findAll({ name: 'Owen' });
+        yield puppet.syncContact();
+        const contactList = yield bot.Contact.findAll();
+        //const contactList = await bot.Contact.findAll({ name: 'Owen' })
         wechaty_1.log.info('Bot', '#######################');
         wechaty_1.log.info('Bot', 'Contact number: %d\n', contactList.length);
         let wechatUsers = [];
@@ -105,13 +139,13 @@ function main() {
             let isCoworker = await contact.coworker();
             let title= await contact.title()
             */
-            if (contact.type() === wechaty_1.Contact.Type.Official) {
+            if (contact.type() === PUPPET.types.Contact.Official) {
                 wechaty_1.log.info('Bot', `official ${i}: ${contact}`);
             }
             /**
             *  personal contact list
             */
-            else if (contact.type() === wechaty_1.Contact.Type.Individual && isFriend) {
+            else if (contact.type() === PUPPET.types.Contact.Individual && isFriend) {
                 let wechatUser = new WechatFriendUserInfoInMartyAccount_1.WechatFriendUserInfoInMartyAccount();
                 let tagNamesForCurUser = "";
                 wechaty_1.log.info('Bot', `personal ${i}: ${contact.name()} : ${contact.id}`);
@@ -175,10 +209,10 @@ function createMySQLConnection() {
     return __awaiter(this, void 0, void 0, function* () {
         let entitiesPath;
         if (__dirname.includes("out")) {
-            entitiesPath = "d:/Working/MyOwnGithub/padlocal-tagbased-bot/out/entity/*.js";
+            entitiesPath = "E:/Working/MyOwnGithub/padlocal-tagbased-bot/out/entity/*.js";
         }
         else {
-            entitiesPath = "d:/Working/MyOwnGithub/padlocal-tagbased-bot/entity/*.ts";
+            entitiesPath = "E:/Working/MyOwnGithub/padlocal-tagbased-bot/entity/*.ts";
         }
         return (0, typeorm_1.createConnection)({
             type: "mysql",
