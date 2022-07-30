@@ -8,7 +8,9 @@ import {ContactAndInterest} from "./entity/ContactAndInterest";
 import * as fs from 'fs';
 
 import {PuppetPadlocal} from "wechaty-puppet-padlocal";
-import {Contact, Message, ScanStatus, Wechaty, log, Tag} from "wechaty";
+import {dingDongBot, getMessagePayload, LOGPRE} from "./helper";
+import {Contact, Message, ScanStatus, Wechaty, log, Tag, WechatyBuilder} from "wechaty";
+import * as PUPPET from 'wechaty-puppet'
 import { BtcPriceMessage } from "./entity/BtcPriceMessage";
 import { UniCorn } from "./entity/UniCorn";
 
@@ -20,55 +22,96 @@ interface MyObj {
 }
 
 // open the debug logging.
-log.level("silly");
+// log.level("silly");
 
 
 // padlocal token
-const token: string = "puppet_padlocal_85f584183cb345459e3de985e01b0fe5"
+// const token: string = "puppet_padlocal_85f584183cb345459e3de985e01b0fe5"
+const token: string = "puppet_padlocal_30a4a75df12f470e8af1642cd5e7e7e1"
+
 const puppet = new PuppetPadlocal({ token })
 
 // don't know why, if we define here, the function will not get the records while
 // inside other functions, looks like this cannot be a static variable.. 
-const bot = new Wechaty({
-    name: "TestBot",
-    puppet,
+const bot = WechatyBuilder.build({
+  name: "PadLocalDemo",
+  puppet,
 })
-
 
 
 bot
 .on("scan", (qrcode: string, status: ScanStatus) => {
     if (status === ScanStatus.Waiting && qrcode) {
-        const qrcodeImageUrl = ["https://api.qrserver.com/v1/create-qr-code/?data=", encodeURIComponent(qrcode)].join("");
-        console.log(`onScan: ${ScanStatus[status]}(${status}) - ${qrcodeImageUrl}`);
-    } else { 
-        console.log(`onScan: ${ScanStatus[status]}(${status})`);
+      const qrcodeImageUrl = [
+        'https://wechaty.js.org/qrcode/',
+        encodeURIComponent(qrcode),
+      ].join('')
+
+      log.info(LOGPRE, `onScan: ${ScanStatus[status]}(${status}) - ${qrcodeImageUrl}`);
+
+      require('qrcode-terminal').generate(qrcode, {small: true})  // show qrcode on console
+    } else {
+      log.info(LOGPRE, `onScan: ${ScanStatus[status]}(${status})`);
     }
 })
 
 .on("login", (user: Contact) => {
-    console.log(`${user} login`);
+  log.info(LOGPRE, `${user} login`);
 
-    // here we run the main method, this is sync method to call async, so it will not block and wait.
-    main()
+   // here we run the main method, this is sync method to call async, so it will not block and wait.
+   main()
 })
 
-.on("logout", (user: Contact) => {
-    console.log(`${user} logout`);
+.on("logout", (user, reason) => {
+  log.info(LOGPRE, `${user} logout, reason: ${reason}`);
 })
 
-.on("message", async (message: Message) => {
-    console.log(`on message: the message is from ${message.from()}`);
-    console.log(`on message: the message content: ${message.text()}`);
+/*
+.on("ready", async () => {
 
-    //dealwithAutoReply(message);
+
+  let contactList = await bot.Contact.findAll()
+  console.debug(contactList)
+
+ 
 })
 
-.start()
+.on("message", async (message) => {
+  log.info(LOGPRE, `on message: ${message.toString()}`);
 
+  await getMessagePayload(message);
 
-console.log("TestBot", "started");
+  await dingDongBot(message);
+})
 
+.on("room-invite", async (roomInvitation) => {
+  log.info(LOGPRE, `on room-invite: ${roomInvitation}`);
+})
+
+.on("room-join", (room, inviteeList, inviter, date) => {
+  log.info(LOGPRE, `on room-join, room:${room}, inviteeList:${inviteeList}, inviter:${inviter}, date:${date}`);
+})
+
+.on("room-leave", (room, leaverList, remover, date) => {
+  log.info(LOGPRE, `on room-leave, room:${room}, leaverList:${leaverList}, remover:${remover}, date:${date}`);
+})
+
+.on("room-topic", (room, newTopic, oldTopic, changer, date) => {
+  log.info(LOGPRE, `on room-topic, room:${room}, newTopic:${newTopic}, oldTopic:${oldTopic}, changer:${changer}, date:${date}`);
+})
+
+.on("friendship", (friendship) => {
+  log.info(LOGPRE, `on friendship: ${friendship}`);
+})
+*/
+.on("error", (error) => {
+  log.error(LOGPRE, `on error: ${error}`);
+})
+
+// here to start.
+bot.start().then(() => {
+log.info(LOGPRE, "started.");
+});
 
 
 /**
@@ -78,7 +121,12 @@ async function main() {
     //const contactList = await bot.Contact.findAll()
     log.info('Bot', 'starting the main function')
 
-    const contactList = await bot.Contact.findAll({ name: 'Owen' })
+    await puppet.syncContact()
+//    const contactList = await bot.Contact.findAll({ name: 'Marty' })
+    const contactList = await bot.Contact.findAll()
+//    const contactList = await bot.Contact.findAll({id: 'jynbman'})
+
+    // const contactList = await bot.Contact.findAll({type: PUPPET.types.Contact.Official})
 
     log.info('Bot', '#######################')
     log.info('Bot', 'Contact number: %d\n', contactList.length)
@@ -88,7 +136,7 @@ async function main() {
      */
     for (let i = 0; i < contactList.length; i++) {
       const contact = contactList[i]
-      if (contact.type() === Contact.Type.Official) {
+      if (contact.type() === PUPPET.types.Contact.Official) {
         log.info('Bot', `official ${i}: ${contact}`)
       }
     }
@@ -99,7 +147,7 @@ async function main() {
   
     for (let i = 0; i < contactList.length; i++) {
       const contact = contactList[i]
-      if (contact.type() === Contact.Type.Individual) {
+      if (contact.type() === PUPPET.types.Contact.Individual) {
         log.info('Bot', `personal ${i}: ${contact.name()} : ${contact.id}`)
       }
     }
